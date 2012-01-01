@@ -144,8 +144,9 @@ class Hybrid_Auth
 
 			// try to provide the previous if any
 			// Exception::getPrevious (PHP 5 >= 5.3.0) http://php.net/manual/en/exception.getprevious.php
-			if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) && ($p instanceof Exception) ) {  
-				throw new Exception( $m, $c, $p );
+      if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) { 
+        throw $p; 
+				//throw new Exception( $m, $c, $p );
 			}
 			else{
 				throw new Exception( $m, $c );
@@ -250,7 +251,7 @@ class Hybrid_Auth
 		if( ! $params ){ 
 			$params = Hybrid_Auth::storage()->get( "hauth_session.$providerId.id_provider_params" );
 			
-			Hybrid_Logger::debug( "Hybrid_Auth::setup( $providerId ), no params given. Trying to get the sorted for this provider.", $params );
+			Hybrid_Logger::debug( "Hybrid_Auth::setup( $providerId ), no params given. Trying to get the sotred for this provider.", $params );
 		}
 
 		if( ! $params ){ 
