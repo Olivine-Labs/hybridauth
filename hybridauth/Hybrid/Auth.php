@@ -128,7 +128,9 @@ class Hybrid_Auth
 		$_SESSION["HA::VERSION"]        = Hybrid_Auth::$version; 
 
 		// almost done, check for errors then move on
-		Hybrid_Logger::info( "Hybrid_Auth::initialize(), stated. Hybrid_Auth has been called from: " . Hybrid_Auth::getCurrentUrl() ); 
+		Hybrid_Logger::info( "Enter Hybrid_Auth::initialize()"); 
+		Hybrid_Logger::info( "Hybrid_Auth::initialize(). Hybrid_Auth used version: " . Hybrid_Auth::$version ); 
+		Hybrid_Logger::info( "Hybrid_Auth::initialize(). Hybrid_Auth called from: " . Hybrid_Auth::getCurrentUrl() ); 
 		Hybrid_Logger::debug( "Hybrid_Auth initialize. dump used config: ", serialize( $config ) );
 		Hybrid_Logger::debug( "Hybrid_Auth initialize. dump current session: ", serialize( $_SESSION ) ); 
 		Hybrid_Logger::info( "Hybrid_Auth initialize: check if any error is stored on the endpoint..." );
@@ -144,7 +146,7 @@ class Hybrid_Auth
 
 			// try to provide the previous if any
 			// Exception::getPrevious (PHP 5 >= 5.3.0) http://php.net/manual/en/exception.getprevious.php
-			if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) ) {  
+			if ( version_compare( PHP_VERSION, '5.3.0', '>=' ) && ($p instanceof Exception) ) { 
 				throw new Exception( $m, $c, $p );
 			}
 			else{
@@ -250,7 +252,7 @@ class Hybrid_Auth
 		if( ! $params ){ 
 			$params = Hybrid_Auth::storage()->get( "hauth_session.$providerId.id_provider_params" );
 			
-			Hybrid_Logger::debug( "Hybrid_Auth::setup( $providerId ), no params given. Trying to get the sorted for this provider.", $params );
+			Hybrid_Logger::debug( "Hybrid_Auth::setup( $providerId ), no params given. Trying to get the sotred for this provider.", $params );
 		}
 
 		if( ! $params ){ 
@@ -295,6 +297,28 @@ class Hybrid_Auth
 		foreach( Hybrid_Auth::$config["providers"] as $idpid => $params ){
 			if( Hybrid_Auth::isConnectedWith( $idpid ) ){
 				$idps[] = $idpid;
+			}
+		}
+
+		return $idps;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	* Return array listing all enabled providers as well as a flag if you are connected.
+	*/ 
+	public static function getProviders()
+	{
+		$idps = array();
+
+		foreach( Hybrid_Auth::$config["providers"] as $idpid => $params ){
+			if($params['enabled']) {
+				$idps[$idpid] = array( 'connected' => false );
+
+				if( Hybrid_Auth::isConnectedWith( $idpid ) ){
+					$idps[$idpid]['connected'] = true;
+				}
 			}
 		}
 
@@ -362,7 +386,7 @@ class Hybrid_Auth
 			$protocol = 'http://';
 		}
 
-		$url = $protocol . $_SERVER['HTTP_HOST'];
+		$url = $protocol . $_SERVER['SERVER_NAME'];
 
 		// use port if non default
 		$url .= 
